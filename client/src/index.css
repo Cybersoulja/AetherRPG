@@ -28,3 +28,26 @@ canvas {
   height: 100% !important;
   touch-action: none;
 }
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+/* Touch-friendly targets */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Extra small breakpoint for very small phones */
+@media (max-width: 375px) {
+  .xs\:hidden {
+    display: none !important;
+  }
+  .xs\:inline {
+    display: inline !important;
+  }
+}

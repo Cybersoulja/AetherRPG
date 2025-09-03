@@ -59,8 +59,8 @@ export const ChoiceButtons: React.FC<ChoiceButtonsProps> = ({
   };
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-semibold text-blue-400 mb-4">Choose your action:</h3>
+    <div className="space-y-2 sm:space-y-3">
+      <h3 className="text-base sm:text-lg font-semibold text-blue-400 mb-2 sm:mb-4">Choose your action:</h3>
       
       <div className="grid gap-2">
         {choices.map((choice, index) => {
@@ -74,17 +74,17 @@ export const ChoiceButtons: React.FC<ChoiceButtonsProps> = ({
               size="lg"
               onClick={() => onChoice(index)}
               disabled={disabled}
-              className="w-full justify-between text-left h-auto p-4 bg-gray-800 border-gray-600 hover:bg-gray-700 hover:border-gray-500 transition-all duration-200"
+              className="w-full justify-between text-left h-auto p-3 sm:p-4 bg-gray-800 border-gray-600 hover:bg-gray-700 hover:border-gray-500 transition-all duration-200 min-h-[3rem] touch-manipulation"
             >
-              <div className="flex items-center gap-3">
-                {icon && <span className="text-lg">{icon}</span>}
-                <span className="text-sm leading-relaxed">{choice.text}</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                {icon && <span className="text-base sm:text-lg">{icon}</span>}
+                <span className="text-xs sm:text-sm leading-relaxed">{choice.text}</span>
               </div>
               
               {disabled ? (
-                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-gray-400" />
               ) : (
-                <ChevronRight className="h-4 w-4 text-gray-400" />
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
               )}
             </Button>
           );

@@ -53,52 +53,56 @@ export const GameInterface: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 p-4">
+      <div className="bg-gray-800 border-b border-gray-700 p-2 sm:p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Gamepad2 className="h-6 w-6 text-blue-400" />
-            <h1 className="text-xl font-bold">Aethermoor Chronicles</h1>
-          </div>
           <div className="flex items-center gap-2">
+            <Gamepad2 className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
+            <h1 className="text-lg sm:text-xl font-bold truncate">Aethermoor</h1>
+          </div>
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleMute}
-              className="text-gray-300 hover:text-white"
+              className="text-gray-300 hover:text-white p-1 sm:p-2"
             >
               {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </Button>
-            <span className="text-sm text-gray-400">
-              {character.name} - Level {character.level} {character.class}
+            <span className="text-xs sm:text-sm text-gray-400 truncate max-w-24 sm:max-w-none">
+              {character.name} - L{character.level}
             </span>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto p-4 max-w-6xl">
+      <div className="container mx-auto p-2 sm:p-4 max-w-6xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-800 border-gray-700">
-            <TabsTrigger value="story" className="flex items-center gap-2">
-              <Gamepad2 className="h-4 w-4" />
-              Adventure
+          <TabsList className="grid w-full grid-cols-4 bg-gray-800 border-gray-700 h-auto">
+            <TabsTrigger value="story" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+              <Gamepad2 className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Adventure</span>
+              <span className="xs:hidden">Game</span>
             </TabsTrigger>
-            <TabsTrigger value="character" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Character
+            <TabsTrigger value="character" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+              <User className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Character</span>
+              <span className="xs:hidden">Char</span>
             </TabsTrigger>
-            <TabsTrigger value="inventory" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Inventory
+            <TabsTrigger value="inventory" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+              <Package className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Inventory</span>
+              <span className="xs:hidden">Inv</span>
             </TabsTrigger>
-            <TabsTrigger value="save" className="flex items-center gap-2">
-              <Save className="h-4 w-4" />
-              Save/Load
+            <TabsTrigger value="save" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+              <Save className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Save/Load</span>
+              <span className="xs:hidden">Save</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="story" className="mt-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <TabsContent value="story" className="mt-2 sm:mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-4">
               {/* Main Story Panel */}
               <div className="lg:col-span-2">
                 <StoryDisplay
