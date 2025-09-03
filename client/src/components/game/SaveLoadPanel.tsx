@@ -1,0 +1,326 @@
+import React, { useState, useEffect } from 'react';
+import { useCharacter } from '../../lib/stores/useCharacter';
+import { useInventory } from '../../lib/stores/useInventory';
+import { useStoryEngine } from '../../lib/stores/useStoryEngine';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Badge } from '../ui/badge';
+import { Alert, AlertDescription } from '../ui/alert';
+import { Save, Upload, Trash2, FileText, Clock, User } from 'lucide-react';
+import { GameState } from '../../types/game';
+
+export const SaveLoadPanel: React.FC = () => {
+  const { character, gameEngine, updateCharacter } = useCharacter();
+  const { items, initializeInventory } = useInventory();
+  const { saveProgress, loadProgress, resetStory } = useStoryEngine();
+  const [saves, setSaves] = useState<Array<{ name: string; data: GameState; timestamp: Date }>>([]);
+  const [saveName, setSaveName] = useState('');
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+
+  useEffect(() => {
+    loadSaves();
+  }, []);
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+  const loadSaves = () => {
+    try {
+      const savedGames = localStorage.getItem('rpg_saved_games');
+      if (savedGames) {
+        const parsedSaves = JSON.parse(savedGames).map((save: any) => ({
+          ...save,
+          timestamp: new Date(save.timestamp)
+        }));
+        setSaves(parsedSaves);
+      }
+    } catch (error) {
+      console.error('Failed to load saves:', error);
+      setMessage({ type: 'error', text: 'Failed to load saved games.' });
+    }
+  };
+
+  const saveGame = () => {
+    if (!character) {
+      setMessage({ type: 'error', text: 'No character to save.' });
+      return;
+    }
+
+    if (!saveName.trim()) {
+      setMessage({ type: 'error', text: 'Please enter a save name.' });
+      return;
+    }
+
+    try {
+      const gameState: GameState = {
+        character,
+        inventory: items,
+        storyState: null, // Would need to get from story engine
+        currentLocation: 'unknown',
+        gameFlags: {},
+        combatState: null,
+        lastSaved: new Date()
+      };
+
+      const saveData = {
+        name: saveName.trim(),
+        data: gameState,
+        timestamp: new Date()
+      };
+
+      const existingIndex = saves.findIndex(save => save.name === saveName.trim());
+      let updatedSaves;
+      
+      if (existingIndex !== -1) {
+        updatedSaves = [...saves];
+        updatedSaves[existingIndex] = saveData;
+      } else {
+        updatedSaves = [...saves, saveData];
+      }
+
+      // Keep only the last 10 saves
+      if (updatedSaves.length > 10) {
+        updatedSaves = updatedSaves.slice(-10);
+      }
+
+      localStorage.setItem('rpg_saved_games', JSON.stringify(updatedSaves));
+      setSaves(updatedSaves);
+      saveProgress(); // Save story progress
+      setSaveName('');
+      setMessage({ type: 'success', text: `Game saved as "${saveData.name}".` });
+    } catch (error) {
+      console.error('Failed to save game:', error);
+      setMessage({ type: 'error', text: 'Failed to save game.' });
+    }
+  };
+
+  const loadGame = (saveData: { name: string; data: GameState; timestamp: Date }) => {
+    try {
+      const { data } = saveData;
+      
+      if (data.character) {
+        updateCharacter(data.character);
+        initializeInventory(data.character.class);
+        
+        // Add inventory items
+        data.inventory.forEach(item => {
+          // Would need to add items to inventory store
+        });
+        
+        loadProgress(); // Load story progress
+        setMessage({ type: 'success', text: `Game "${saveData.name}" loaded successfully.` });
+      } else {
+        setMessage({ type: 'error', text: 'Invalid save data.' });
+      }
+    } catch (error) {
+      console.error('Failed to load game:', error);
+      setMessage({ type: 'error', text: 'Failed to load game.' });
+    }
+  };
+
+  const deleteSave = (saveName: string) => {
+    try {
+      const updatedSaves = saves.filter(save => save.name !== saveName);
+      localStorage.setItem('rpg_saved_games', JSON.stringify(updatedSaves));
+      setSaves(updatedSaves);
+      setMessage({ type: 'info', text: `Save "${saveName}" deleted.` });
+    } catch (error) {
+      console.error('Failed to delete save:', error);
+      setMessage({ type: 'error', text: 'Failed to delete save.' });
+    }
+  };
+
+  const exportSave = (saveData: { name: string; data: GameState; timestamp: Date }) => {
+    try {
+      const dataStr = JSON.stringify(saveData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(dataBlob);
+      link.download = `${saveData.name}_save.json`;
+      link.click();
+      
+      setMessage({ type: 'success', text: 'Save exported successfully.' });
+    } catch (error) {
+      console.error('Failed to export save:', error);
+      setMessage({ type: 'error', text: 'Failed to export save.' });
+    }
+  };
+
+  const quickSave = () => {
+    const timestamp = new Date().toLocaleString();
+    setSaveName(`Quick Save - ${timestamp}`);
+    setTimeout(() => saveGame(), 100);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Message Alert */}
+      {message && (
+        <Alert className={`${
+          message.type === 'error' ? 'border-red-500 bg-red-950' :
+          message.type === 'success' ? 'border-green-500 bg-green-950' :
+          'border-blue-500 bg-blue-950'
+        }`}>
+          <AlertDescription className="text-white">
+            {message.text}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Save Game */}
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-green-400">
+            <Save className="h-5 w-5" />
+            Save Game
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Enter save name..."
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && saveGame()}
+              className="bg-gray-700 border-gray-600 text-white"
+            />
+            <Button 
+              onClick={saveGame}
+              disabled={!character || !saveName.trim()}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Save
+            </Button>
+          </div>
+          
+          <Button 
+            onClick={quickSave}
+            disabled={!character}
+            variant="outline"
+            className="w-full border-gray-600 hover:bg-gray-700"
+          >
+            Quick Save
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Load Game */}
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-400">
+            <Upload className="h-5 w-5" />
+            Load Game
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {saves.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+              <p className="text-gray-400">No saved games found.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {saves.map((save, index) => (
+                <Card key={index} className="bg-gray-700 border-gray-600">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-semibold text-white">{save.name}</h4>
+                          {save.data.character && (
+                            <Badge variant="secondary" className="bg-gray-600 text-gray-300">
+                              Level {save.data.character.level} {save.data.character.class}
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-xs text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {save.data.character?.name || 'Unknown'}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {save.timestamp.toLocaleDateString()} {save.timestamp.toLocaleTimeString()}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => loadGame(save)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Load
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => exportSave(save)}
+                          className="border-gray-600 hover:bg-gray-600"
+                        >
+                          Export
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deleteSave(save.name)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Game Management */}
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-purple-400">
+            <FileText className="h-5 w-5" />
+            Game Management
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Button
+            variant="outline"
+            onClick={() => {
+              gameEngine.deleteSave();
+              resetStory();
+              setMessage({ type: 'info', text: 'Current progress reset.' });
+            }}
+            className="w-full border-gray-600 hover:bg-gray-700"
+          >
+            Reset Current Progress
+          </Button>
+          
+          <Button
+            variant="destructive"
+            onClick={() => {
+              if (confirm('This will delete all saved games. Are you sure?')) {
+                localStorage.removeItem('rpg_saved_games');
+                setSaves([]);
+                setMessage({ type: 'info', text: 'All saved games deleted.' });
+              }
+            }}
+            className="w-full"
+          >
+            Delete All Saves
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

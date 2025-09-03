@@ -1,0 +1,141 @@
+{
+  "inkVersion": 21,
+  "root": [
+    "^Welcome to Aethermoor Chronicles!",
+    "\n",
+    "^You are a brave adventurer in a fantasy realm.",
+    "\n",
+    [
+      {
+        "*": [
+          "^Start your adventure",
+          {
+            "->": "start_adventure"
+          }
+        ]
+      },
+      {
+        "*": [
+          "^Learn about the world",
+          {
+            "->": "world_info"
+          }
+        ]
+      }
+    ],
+    {
+      "start_adventure": [
+        "^Your adventure begins in the town of Millbrook. You can explore different areas.",
+        "\n",
+        [
+          {
+            "*": [
+              "^Visit the tavern",
+              {
+                "->": "tavern"
+              }
+            ]
+          },
+          {
+            "*": [
+              "^Go to the forest",
+              {
+                "->": "forest"
+              }
+            ]
+          }
+        ]
+      ],
+      "world_info": [
+        "^Aethermoor is a land of magic and mystery, where ancient evils stir and heroes are needed.",
+        "\n",
+        [
+          {
+            "*": [
+              "^Begin your quest",
+              {
+                "->": "start_adventure"
+              }
+            ]
+          }
+        ]
+      ],
+      "tavern": [
+        "^You enter a cozy tavern filled with warmth and the sound of conversation.",
+        "\n",
+        [
+          {
+            "*": [
+              "^Talk to the barkeeper",
+              {
+                "->": "barkeeper"
+              }
+            ]
+          },
+          {
+            "*": [
+              "^Leave the tavern",
+              {
+                "->": "start_adventure"
+              }
+            ]
+          }
+        ]
+      ],
+      "forest": [
+        "^You venture into a dark forest where mysterious things await.",
+        "\n",
+        [
+          {
+            "*": [
+              "^Explore deeper",
+              {
+                "->": "forest_deep"
+              }
+            ]
+          },
+          {
+            "*": [
+              "^Return to town",
+              {
+                "->": "start_adventure"
+              }
+            ]
+          }
+        ]
+      ],
+      "barkeeper": [
+        "^The barkeeper tells you about strange happenings in the forest.",
+        "\n",
+        [
+          {
+            "*": [
+              "^Investigate the forest",
+              {
+                "->": "forest"
+              }
+            ]
+          }
+        ]
+      ],
+      "forest_deep": [
+        "^In the depths of the forest, you discover an ancient evil that must be stopped!",
+        "\n",
+        "^You have saved the realm! Congratulations, hero!",
+        "\n",
+        [
+          {
+            "*": [
+              "^Start a new adventure",
+              {
+                "->": "root"
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  ],
+  "globalTags": [],
+  "listDefs": {}
+}
