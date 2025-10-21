@@ -1,3 +1,6 @@
+/**
+ * Zustand store for managing audio.
+ */
 import { create } from "zustand";
 
 interface AudioState {

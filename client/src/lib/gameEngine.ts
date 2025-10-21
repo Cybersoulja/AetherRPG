@@ -1,3 +1,7 @@
+/**
+ * The main game engine.
+ * This class is responsible for managing the game state, character creation, and combat.
+ */
 import { Character, CharacterClass, GameState, Item, CombatState, Enemy } from '../types/game';
 import { CHARACTER_CLASSES } from '../data/characters';
 import { STARTING_ITEMS, CONSUMABLE_ITEMS } from '../data/items';

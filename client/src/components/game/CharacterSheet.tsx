@@ -5,6 +5,10 @@ import { Progress } from '../ui/progress';
 import { Badge } from '../ui/badge';
 import { User, Heart, Zap, Coins, Star, TrendingUp } from 'lucide-react';
 
+/**
+ * A component that displays the character's sheet, including stats, inventory, and other information.
+ * @returns {JSX.Element} The rendered character sheet.
+ */
 export const CharacterSheet: React.FC = () => {
   const { character, gameEngine } = useCharacter();
 

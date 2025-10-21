@@ -15,12 +15,30 @@ import {
 } from 'lucide-react';
 import { useAudio } from '../../lib/stores/useAudio';
 
+/**
+ * Props for the WelcomeScreen component.
+ */
 interface WelcomeScreenProps {
+  /**
+   * Callback function to be called when the user starts a new game.
+   */
   onStartNewGame: () => void;
+  /**
+   * Callback function to be called when the user continues a saved game.
+   */
   onContinueGame: () => void;
+  /**
+   * Whether there is a saved game to continue.
+   */
   hasSavedGame: boolean;
 }
 
+/**
+ * The welcome screen of the game.
+ * It provides options to start a new game or continue a saved game.
+ * @param {WelcomeScreenProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered welcome screen.
+ */
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onStartNewGame,
   onContinueGame,

@@ -1,3 +1,6 @@
+/**
+ * This file contains the AI agent engine for the game.
+ */
 import { AIAgent } from '../types/game';
 
 export class AIAgentEngine {

@@ -1,3 +1,6 @@
+/**
+ * Zustand store for managing AI agents.
+ */
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { AIAgent } from '../../types/game';

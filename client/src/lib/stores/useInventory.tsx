@@ -1,3 +1,6 @@
+/**
+ * Zustand store for managing the player's inventory.
+ */
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { Item, CharacterClass } from '../../types/game';

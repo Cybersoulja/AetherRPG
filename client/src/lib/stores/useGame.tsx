@@ -1,3 +1,6 @@
+/**
+ * Zustand store for managing the game state.
+ */
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 

@@ -1,3 +1,6 @@
+/**
+ * A collection of utility functions.
+ */
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

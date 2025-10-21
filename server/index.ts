@@ -2,10 +2,20 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+/**
+ * The main application instance.
+ * @type {express.Application}
+ */
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+/**
+ * Middleware to log API requests and responses.
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @param {NextFunction} next - The next middleware function.
+ */
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -39,6 +49,13 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  /**
+   * Error handling middleware.
+   * @param {any} err - The error object.
+   * @param {Request} _req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} _next - The next middleware function.
+   */
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
