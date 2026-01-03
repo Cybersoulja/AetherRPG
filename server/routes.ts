@@ -3,6 +3,7 @@ import { createServer, type Server } from 'http';
 import { storage } from './storage';
 import { eq, desc } from 'drizzle-orm';
 import * as schema from '../shared/schema';
+import bcrypt from 'bcrypt';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication Routes
@@ -20,7 +21,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(409).json({ error: 'Username already exists' });
       }
 
-      const user = await storage.insertUser({ username, password });
+      // Hash password before storing
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      const user = await storage.insertUser({ username, password: hashedPassword });
       res.json({ success: true, user: { id: user.id, username: user.username } });
     } catch (error) {
       console.error('Registration error:', error);
@@ -33,7 +38,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { username, password } = req.body;
 
       const user = await storage.getUserByUsername(username);
-      if (!user || user.password !== password) {
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+
+      // Compare password hash
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
