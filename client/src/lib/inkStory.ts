@@ -88,7 +88,8 @@ export class InkStoryEngine {
         this.story.state.LoadJson(storyState);
       }
     } catch (error) {
-      console.warn('Failed to load story progress:', error);
+      console.warn('Failed to load story progress, clearing save:', error);
+      localStorage.removeItem(this.saveKey);
     }
   }
 
