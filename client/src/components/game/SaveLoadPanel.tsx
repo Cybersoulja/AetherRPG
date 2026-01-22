@@ -10,6 +10,10 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { Save, Upload, Trash2, FileText, Clock, User } from 'lucide-react';
 import { GameState } from '../../types/game';
 
+/**
+ * A component that provides functionality for saving and loading the game.
+ * @returns {JSX.Element} The rendered save/load panel.
+ */
 export const SaveLoadPanel: React.FC = () => {
   const { character, gameEngine, updateCharacter } = useCharacter();
   const { items, initializeInventory } = useInventory();

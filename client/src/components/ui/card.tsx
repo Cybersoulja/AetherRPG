@@ -1,3 +1,7 @@
+/**
+ * A reusable card component.
+ * This component is built as a composite of several sub-components to create a flexible card layout.
+ */
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

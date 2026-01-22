@@ -1,3 +1,6 @@
+/**
+ * This file contains the type definitions for the game.
+ */
 export interface Character {
   id: string;
   name: string;

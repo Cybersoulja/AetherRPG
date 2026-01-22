@@ -5,6 +5,11 @@ import { eq, desc } from 'drizzle-orm';
 import * as schema from '../shared/schema';
 import bcrypt from 'bcrypt';
 
+/**
+ * Registers the application's routes.
+ * @param {Express} app - The Express application instance.
+ * @returns {Promise<Server>} A promise that resolves to the HTTP server.
+ */
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication Routes
   app.post('/api/auth/register', async (req, res) => {

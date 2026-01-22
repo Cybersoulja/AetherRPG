@@ -19,11 +19,25 @@ import {
 } from 'lucide-react';
 import { Enemy, CombatAction, CombatState } from '../../types/game';
 
+/**
+ * Props for the CombatPanel component.
+ */
 interface CombatPanelProps {
+  /**
+   * Callback function to be called when combat ends.
+   */
   onCombatEnd: (victory: boolean, rewards?: { experience: number; gold: number; items?: any[] }) => void;
+  /**
+   * An array of enemies to fight.
+   */
   enemies: Enemy[];
 }
 
+/**
+ * A component that displays the combat interface.
+ * @param {CombatPanelProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered combat panel.
+ */
 export const CombatPanel: React.FC<CombatPanelProps> = ({ onCombatEnd, enemies: initialEnemies }) => {
   const { character, takeDamage, gainExperience, modifyGold, gameEngine } = useCharacter();
   const { getResponse } = useAIAgents();

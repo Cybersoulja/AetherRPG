@@ -1,3 +1,7 @@
+/**
+ * A wrapper around the inkjs story engine.
+ * This class is responsible for managing the story flow, choices, and variables.
+ */
 import { Story } from 'inkjs';
 import storyContent from '../data/story.ink.json';
 

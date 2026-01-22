@@ -2,13 +2,33 @@ import React, { useEffect, useRef } from 'react';
 import { Card, CardContent } from '../ui/card';
 import { Loader2, Crown } from 'lucide-react';
 
+/**
+ * Props for the StoryDisplay component.
+ */
 interface StoryDisplayProps {
+  /**
+   * The current story text to display.
+   */
   currentText: string;
+  /**
+   * Whether the story is currently loading.
+   */
   isLoading: boolean;
+  /**
+   * The Dungeon Master's response to the player's actions.
+   */
   dmResponse?: string;
+  /**
+   * Whether the Dungeon Master is currently thinking.
+   */
   isThinking?: boolean;
 }
 
+/**
+ * A component that displays the story text and Dungeon Master responses.
+ * @param {StoryDisplayProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered story display.
+ */
 export const StoryDisplay: React.FC<StoryDisplayProps> = ({
   currentText,
   isLoading,

@@ -2,6 +2,10 @@ import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
 
+/**
+ * A custom hook to determine if the current device is a mobile device.
+ * @returns {boolean} Whether the device is a mobile device.
+ */
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 

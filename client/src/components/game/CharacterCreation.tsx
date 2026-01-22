@@ -18,11 +18,26 @@ import {
 import { CharacterClass } from '../../types/game';
 import { CHARACTER_CLASSES, STARTING_NAMES } from '../../data/characters';
 
+/**
+ * Props for the CharacterCreation component.
+ */
 interface CharacterCreationProps {
+  /**
+   * Callback function to be called when the character is created.
+   */
   onCharacterCreated: () => void;
+  /**
+   * Callback function to be called when the user wants to go back to the main menu.
+   */
   onBackToMenu: () => void;
 }
 
+/**
+ * A component for creating a new character.
+ * It guides the user through selecting a class, naming the character, and confirming their choices.
+ * @param {CharacterCreationProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered character creation screen.
+ */
 export const CharacterCreation: React.FC<CharacterCreationProps> = ({
   onCharacterCreated,
   onBackToMenu

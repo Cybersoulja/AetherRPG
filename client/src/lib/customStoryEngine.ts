@@ -1,3 +1,7 @@
+/**
+ * A custom story engine for the game.
+ * This engine is responsible for managing the story flow, choices, and variables.
+ */
 interface StoryNode {
   id: string;
   text: string;

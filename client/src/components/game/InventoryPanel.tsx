@@ -8,6 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Package, Sword, Shield, Heart, Coins, Star } from 'lucide-react';
 import { Item, ItemType } from '../../types/game';
 
+/**
+ * A component that displays the player's inventory.
+ * @returns {JSX.Element} The rendered inventory panel.
+ */
 export const InventoryPanel: React.FC = () => {
   const { items, useItem, getTotalValue } = useInventory();
   const { character, updateCharacter, gameEngine } = useCharacter();

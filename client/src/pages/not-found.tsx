@@ -1,6 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 
+/**
+ * A page to be displayed when a route is not found.
+ * @returns {JSX.Element} The rendered 404 page.
+ */
 export default function NotFound() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">

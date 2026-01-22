@@ -9,6 +9,10 @@ import { CharacterCreation } from './components/game/CharacterCreation';
 import { GameInterface } from './components/game/GameInterface';
 import '@fontsource/inter';
 
+/**
+ * The main application component that manages game state and renders different game phases.
+ * @returns {JSX.Element} The rendered application.
+ */
 function App() {
   const { character } = useCharacter();
   const { initializeInventory } = useInventory();
@@ -20,6 +24,9 @@ function App() {
 
   // Initialize all game systems
   useEffect(() => {
+    /**
+     * Asynchronously initializes all game systems.
+     */
     const initializeGame = async () => {
       try {
         console.log('Initializing game systems...');
@@ -52,6 +59,9 @@ function App() {
 
   // Auto-unmute audio on first user interaction
   useEffect(() => {
+    /**
+     * Handles the first user interaction to unmute audio.
+     */
     const handleFirstInteraction = () => {
       if (isMuted) {
         console.log('First user interaction detected, unmuting audio');

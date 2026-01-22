@@ -3,12 +3,29 @@ import { Button } from '../ui/button';
 import { StoryChoice } from '../../types/game';
 import { ChevronRight, Loader2 } from 'lucide-react';
 
+/**
+ * Props for the ChoiceButtons component.
+ */
 interface ChoiceButtonsProps {
+  /**
+   * An array of choices to be displayed.
+   */
   choices: StoryChoice[];
+  /**
+   * Callback function to be called when a choice is made.
+   */
   onChoice: (choiceIndex: number) => void;
+  /**
+   * Whether the buttons should be disabled.
+   */
   disabled?: boolean;
 }
 
+/**
+ * A component that displays a list of choices as buttons.
+ * @param {ChoiceButtonsProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered choice buttons.
+ */
 export const ChoiceButtons: React.FC<ChoiceButtonsProps> = ({
   choices,
   onChoice,

@@ -14,6 +14,11 @@ import { Button } from '../ui/button';
 import { Gamepad2, User, Package, Save, Volume2, VolumeX } from 'lucide-react';
 import { useAudio } from '../../lib/stores/useAudio';
 
+/**
+ * The main game interface component.
+ * It displays the story, choices, character sheet, inventory, and save/load panels.
+ * @returns {JSX.Element} The rendered game interface.
+ */
 export const GameInterface: React.FC = () => {
   const { character } = useCharacter();
   const { currentText, currentChoices, initializeStory, makeChoice, isLoading } = useStoryEngine();

@@ -1,3 +1,6 @@
+/**
+ * This file contains the character data for the game, including character classes and starting names.
+ */
 import { CharacterClass, CharacterStats } from '../types/game';
 
 export const CHARACTER_CLASSES: Record<CharacterClass, {

@@ -1,3 +1,6 @@
+/**
+ * Zustand store for managing the story engine.
+ */
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { CustomStoryEngine } from '../customStoryEngine';

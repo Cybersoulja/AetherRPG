@@ -1,3 +1,6 @@
+/**
+ * This file contains the item data for the game, including starting items, consumables, and treasures.
+ */
 import { Item, ItemType, ItemRarity } from '../types/game';
 
 export const STARTING_ITEMS: Record<string, Item[]> = {

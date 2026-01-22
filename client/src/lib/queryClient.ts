@@ -1,3 +1,6 @@
+/**
+ * This file configures the TanStack Query client for the application.
+ */
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
