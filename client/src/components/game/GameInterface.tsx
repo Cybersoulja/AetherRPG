@@ -8,10 +8,11 @@ import { StoryDisplay } from './StoryDisplay';
 import { ChoiceButtons } from './ChoiceButtons';
 import { InventoryPanel } from './InventoryPanel';
 import { SaveLoadPanel } from './SaveLoadPanel';
+import { OraclePanel } from './OraclePanel';
 import { Card, CardContent } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Button } from '../ui/button';
-import { Gamepad2, User, Package, Save, Volume2, VolumeX } from 'lucide-react';
+import { Gamepad2, User, Package, Save, Volume2, VolumeX, Dices } from 'lucide-react';
 import { useAudio } from '../../lib/stores/useAudio';
 
 /**
@@ -83,7 +84,7 @@ export const GameInterface: React.FC = () => {
       {/* Main Content */}
       <div className="container mx-auto p-2 sm:p-4 max-w-6xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-800 border-gray-700 h-auto">
+          <TabsList className="grid w-full grid-cols-5 bg-gray-800 border-gray-700 h-auto">
             <TabsTrigger value="story" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
               <Gamepad2 className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">Adventure</span>
@@ -98,6 +99,11 @@ export const GameInterface: React.FC = () => {
               <Package className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">Inventory</span>
               <span className="xs:hidden">Inv</span>
+            </TabsTrigger>
+            <TabsTrigger value="oracle" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+              <Dices className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Oracle</span>
+              <span className="xs:hidden">Dice</span>
             </TabsTrigger>
             <TabsTrigger value="save" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
               <Save className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -189,6 +195,10 @@ export const GameInterface: React.FC = () => {
 
           <TabsContent value="inventory" className="mt-4">
             <InventoryPanel />
+          </TabsContent>
+
+          <TabsContent value="oracle" className="mt-4">
+            <OraclePanel />
           </TabsContent>
 
           <TabsContent value="save" className="mt-4">
