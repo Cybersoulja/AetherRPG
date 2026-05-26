@@ -182,7 +182,7 @@ export class GameEngine {
       if (item?.stats) {
         Object.entries(item.stats).forEach(([stat, value]) => {
           if (value && stat in baseStats) {
-            baseStats[stat as keyof typeof baseStats] += value;
+            baseStats[stat as keyof typeof baseStats] += value as number;
           }
         });
       }

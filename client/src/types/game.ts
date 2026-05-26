@@ -61,7 +61,7 @@ export type ItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 export interface GameState {
   character: Character | null;
   inventory: Item[];
-  storyState: StoryState;
+  storyState: StoryState | null;
   currentLocation: string;
   gameFlags: Record<string, boolean>;
   combatState: CombatState | null;

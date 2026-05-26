@@ -33,6 +33,9 @@ interface InventoryState {
     success: boolean;
     goldEarned: number;
   };
+
+  // Consuming
+  useItem: (itemId: string) => { success: boolean; message: string };
 }
 
 export const useInventory = create<InventoryState>()(
@@ -152,6 +155,23 @@ export const useInventory = create<InventoryState>()(
     canCraft: (recipe: Recipe) => {
       const { items } = get();
       return canCraftRecipe(recipe, items);
+    },
+
+    // Consuming
+    useItem: (itemId: string) => {
+      const { items, removeItem } = get();
+      const item = items.find((i) => i.id === itemId);
+
+      if (!item) {
+        return { success: false, message: 'Item not found' };
+      }
+
+      if (item.type !== 'consumable') {
+        return { success: false, message: 'Item is not consumable' };
+      }
+
+      removeItem(itemId, 1);
+      return { success: true, message: `Used ${item.name}` };
     },
 
     // Selling
