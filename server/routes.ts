@@ -1,7 +1,7 @@
 import type { Express } from 'express';
 import { createServer, type Server } from 'http';
 import { storage } from './storage';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import * as schema from '../shared/schema';
 import bcrypt from 'bcrypt';
 
@@ -164,8 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const save = await storage.db
         .select()
         .from(schema.gameSaves)
-        .where(eq(schema.gameSaves.userId, req.session.userId))
-        .where(eq(schema.gameSaves.slot, slot))
+        .where(and(eq(schema.gameSaves.userId, req.session.userId!), eq(schema.gameSaves.slot, slot)))
         .limit(1);
 
       if (!save.length) {

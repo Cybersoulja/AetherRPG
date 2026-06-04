@@ -53,6 +53,7 @@ You stand at the entrance of the ancient town of Millbrook, where rumors speak o
             { text: 'Approach the town guard for information', destination: 'guard_conversation' },
             { text: 'Visit the local tavern to gather rumors', destination: 'tavern_scene' },
             { text: 'Explore the marketplace for supplies', destination: 'marketplace' },
+            { text: 'Seek out the village elder for wisdom', destination: 'village_elder' },
             { text: 'Head directly toward the Shadowlands', destination: 'direct_adventure' }
           ],
           tags: ['location:millbrook']
@@ -188,9 +189,10 @@ If you're planning to venture there, you'll need more than just weapons and poti
           id: 'forest_path',
           text: `Following the glowing path, you venture deeper into the cursed forest. The trees seem to watch your every move, their branches reaching out like gnarled fingers.
 
-Soon, you come across the remains of a campsite - clearly belonging to the missing scouts. Among the scattered belongings, you find a journal with disturbing entries about 'the voice in the darkness.'`,
+Soon, you come across the remains of a campsite - clearly belonging to the missing scouts. Among the scattered belongings, you find a journal with disturbing entries about 'the voice in the darkness.' Nearby, ancient stone steps descend into the earth.`,
           choices: [
             { text: 'Read the journal carefully', destination: 'scout_journal' },
+            { text: 'Investigate the stone steps downward', destination: 'dungeon_entrance' },
             { text: 'Continue deeper into the forest', destination: 'forest_depths' }
           ],
           tags: ['location:scout_camp', 'item:scout_journal']
@@ -235,7 +237,8 @@ Eventually, you reach a clearing where an enormous, blackened tree dominates the
 From the depths comes a whispering voice, beautiful yet terrifying, calling to you with promises of power and knowledge. This is clearly the source of the corruption.`,
           choices: [
             { text: 'Descend into the dark passage', destination: 'final_confrontation' },
-            { text: 'Try to seal the opening', destination: 'seal_attempt' },
+            { text: 'Perform the ancient sealing ritual', destination: 'true_ending' },
+            { text: 'Try to seal the opening by force', destination: 'seal_attempt' },
             { text: 'Retreat and seek help', destination: 'start' }
           ],
           tags: ['location:world_tree', 'boss:malachar_lair']
@@ -372,6 +375,239 @@ THE END - Redemption Achieved`,
             { text: 'Enter the darkness to face the source', destination: 'final_confrontation' }
           ],
           tags: ['magic:partial_seal']
+        },
+
+        // --- New content: Town exploration branch ---
+        village_elder: {
+          id: 'village_elder',
+          text: `You find Elder Bramwell in his cottage on the hill, surrounded by ancient maps and yellowed tomes. He studies you carefully before speaking.
+
+"So another seeker comes to Millbrook. Sit down, young one. What troubles the forest goes back centuries — I have seen it stir before, and I know its weaknesses."`,
+          choices: [
+            { text: 'Ask about the weakness of the darkness', destination: 'elder_lore' },
+            { text: 'Ask about the missing villagers', destination: 'elder_missing' },
+            { text: 'Ask him to join your cause', destination: 'elder_join' }
+          ],
+          tags: ['character:elder_bramwell', 'location:elder_cottage']
+        },
+        elder_lore: {
+          id: 'elder_lore',
+          text: `The elder traces a finger along a faded map. "The entity you face feeds on despair and isolation. It cannot abide light born of true kinship — the light of those who fight for one another rather than for power."
+
+He presses a small runestone into your hand. "This was carved by the first druids who sealed the darkness. It may guide your path."
+
+You receive: Druid Runestone`,
+          choices: [
+            { text: 'Thank him and continue your quest', destination: 'start' },
+            { text: 'Ask about the ancient druids', destination: 'druid_history' }
+          ],
+          tags: ['character:elder_bramwell', 'item:druid_runestone']
+        },
+        elder_missing: {
+          id: 'elder_missing',
+          text: `Bramwell's expression falls. "Three farmers, two scouts, and young Petra the herbalist. They wandered toward the forest as if sleepwalking. The voice in the dreams — it calls to those whose hearts carry grief or regret. It preys on their longing."
+
+He pauses. "If any of them are still themselves, you may find them near the ruined chapel east of the World Tree."`,
+          choices: [
+            { text: 'Head to the ruined chapel', destination: 'ruined_chapel' },
+            { text: 'Return to town for now', destination: 'start' }
+          ],
+          tags: ['character:elder_bramwell', 'quest:find_missing']
+        },
+        elder_join: {
+          id: 'elder_join',
+          text: `The old man chuckles, rising with surprising ease. "Join you? My fighting days are long past. But I can do something better." He hands you a sealed letter. "Give this to the druid circle in the hidden grove. They will answer its call."
+
+You receive: Sealed Letter`,
+          choices: [
+            { text: 'Head to the hidden grove', destination: 'stone_circle' },
+            { text: 'Return to town for now', destination: 'start' }
+          ],
+          tags: ['character:elder_bramwell', 'item:sealed_letter']
+        },
+        druid_history: {
+          id: 'druid_history',
+          text: `"The druids of the Old Circle bound Malachar three hundred years ago using a ritual that required sacrifice — not of blood, but of memory. Each druid gave up their happiest recollection, feeding that joy into the seal.
+
+The seal has weakened because the last druid passed away last winter, taking her memory with her. You must restore what was lost."`,
+          choices: [
+            { text: 'Ask how to restore the seal', destination: 'stone_circle' },
+            { text: 'Return to your journey', destination: 'start' }
+          ],
+          tags: ['character:elder_bramwell', 'lore:seal_history']
+        },
+
+        // --- New content: Ruined chapel side quest ---
+        ruined_chapel: {
+          id: 'ruined_chapel',
+          text: `East of the World Tree you discover the remnants of a stone chapel, its roof collapsed, vines strangling what remains of its walls. Inside, three figures sit motionless in the pews — their eyes open but unseeing.
+
+One of them, a young woman with soil-stained hands, whispers, "It's so beautiful... the voice..."`,
+          choices: [
+            { text: 'Try to wake the nearest villager', destination: 'wake_villagers' },
+            { text: 'Look for something to break the trance', destination: 'chapel_search' },
+            { text: 'Leave them — the mission comes first', destination: 'forest_depths' }
+          ],
+          tags: ['location:ruined_chapel', 'quest:find_missing']
+        },
+        wake_villagers: {
+          id: 'wake_villagers',
+          text: `You shake the young woman firmly. She convulses — then gasps, eyes flooding with confusion and fear. "Where... where am I?" The other two stir as well, as if your actions have weakened the trance's hold.
+
+"You saved us," she breathes. Petra the herbalist reaches into her satchel and presses a vial of something luminous into your hands.
+
+You receive: Vial of Clarifying Light`,
+          choices: [
+            { text: 'Escort them back toward town', destination: 'chapel_escape' },
+            { text: 'Ask what they saw in the trance', destination: 'trance_vision' }
+          ],
+          tags: ['quest:find_missing_complete', 'item:clarifying_light']
+        },
+        chapel_search: {
+          id: 'chapel_search',
+          text: `Behind the altar you find a cracked holy symbol, still faintly warm to the touch. Clutching it, you feel a surge of clarity that seems to radiate outward from you like a ripple in still water.
+
+The three villagers shudder, blink, and cry out in confusion. The trance is broken.`,
+          choices: [
+            { text: 'Help them to safety', destination: 'chapel_escape' },
+            { text: 'Ask what they experienced', destination: 'trance_vision' }
+          ],
+          tags: ['location:ruined_chapel', 'item:holy_symbol']
+        },
+        trance_vision: {
+          id: 'trance_vision',
+          text: `Petra grips your arm. "It showed us things — a vast darkness beneath the roots of the world, ancient and patient. It was waiting for someone worthy to open the door fully. It's been testing everyone, looking for the right key."
+
+Her eyes are urgent. "You are being tested too. Every choice you make, it watches."`,
+          choices: [
+            { text: 'Return them to town and prepare', destination: 'chapel_escape' }
+          ],
+          tags: ['lore:malachar_test', 'character:petra']
+        },
+        chapel_escape: {
+          id: 'chapel_escape',
+          text: `You guide the rescued villagers back toward the forest edge. They're shaken but alive, and grateful beyond words. Word of your act spreads quickly — Millbrook's people look at you differently now, with something closer to belief than hope.
+
+You feel bolstered by their trust.
+
+You gain: 200 XP, Town's Gratitude`,
+          choices: [
+            { text: 'Continue into the Shadowlands', destination: 'enter_shadowlands' },
+            { text: 'Return to town briefly', destination: 'start' }
+          ],
+          tags: ['quest:find_missing_complete', 'xp:200']
+        },
+
+        // --- New content: Dungeon route ---
+        dungeon_entrance: {
+          id: 'dungeon_entrance',
+          text: `Branching from the forest path, a set of ancient stone steps descends into the earth. A carved lintel above reads in Old Tongue: "Here lie the ones who challenged the dark and did not return."
+
+Cool, stale air drifts upward. Torchlight flickers somewhere deep below.`,
+          choices: [
+            { text: 'Descend the steps', destination: 'dungeon_upper' },
+            { text: 'Mark the location and continue on the forest path', destination: 'forest_path' }
+          ],
+          tags: ['location:dungeon_entrance', 'discovery:dungeon']
+        },
+        dungeon_upper: {
+          id: 'dungeon_upper',
+          text: `The upper chamber is a maze of crumbling corridors. Skeletal remains line the walls, some still clutching rusted weapons. You find signs of recent habitation — a bedroll, scattered rations — likely the missing scouts.
+
+A distant sound of dripping water leads you deeper. At the chamber's far end, two passages split: one lit by phosphorescent fungi, one utterly dark.`,
+          choices: [
+            { text: 'Follow the glowing fungi passage', destination: 'dungeon_fungi_hall' },
+            { text: 'Enter the dark passage (light a torch)', destination: 'dungeon_dark_hall' }
+          ],
+          tags: ['location:dungeon_upper', 'discovery:scout_camp_underground']
+        },
+        dungeon_fungi_hall: {
+          id: 'dungeon_fungi_hall',
+          text: `The fungi cast an eerie blue-green light that reveals stunning crystalline formations along the walls — and also shadow wolves crouched between the stalagmites. Three of them, watching you.
+
+You reach slowly for your weapon. The largest wolf tilts its head, then... steps aside, as if allowing you to pass.`,
+          choices: [
+            { text: 'Walk past cautiously', destination: 'dungeon_treasure_room' },
+            { text: 'Attack before they can', destination: 'dungeon_wolf_fight' }
+          ],
+          tags: ['location:dungeon_fungi_hall', 'encounter:shadow_wolves']
+        },
+        dungeon_wolf_fight: {
+          id: 'dungeon_wolf_fight',
+          text: `You strike first, but the shadow wolves are faster than anything natural. After a brutal skirmish you drive them off — but at a cost. You're bloodied and exhausted.
+
+Beyond where they stood, the passage continues to an ornate door.`,
+          choices: [
+            { text: 'Push through the ornate door', destination: 'dungeon_treasure_room' }
+          ],
+          tags: ['combat:shadow_wolves', 'xp:150']
+        },
+        dungeon_dark_hall: {
+          id: 'dungeon_dark_hall',
+          text: `Torchlight barely dents the oppressive blackness. Your footsteps echo in strange ways, as if the passage is larger than it should be. Then your torch illuminates a face — carved in stone directly at eye level.
+
+It speaks. "Answer my riddle or be lost in the dark forever: I speak without a mouth and hear without ears. I have no body but come alive with wind. What am I?"`,
+          choices: [
+            { text: 'Answer: An echo', destination: 'riddle_correct' },
+            { text: 'Answer: A ghost', destination: 'riddle_wrong' },
+            { text: 'Answer: A whisper', destination: 'riddle_wrong' }
+          ],
+          tags: ['location:dungeon_dark_hall', 'puzzle:riddle']
+        },
+        riddle_correct: {
+          id: 'riddle_correct',
+          text: `The stone face cracks into something resembling a smile. "Well met, seeker." The wall beside it grinds open, revealing a hidden alcove containing weapons blessed against darkness and a map of the underground passages.
+
+You receive: Shadow-Bane Dagger, Underground Map`,
+          choices: [
+            { text: 'Continue to the treasure room', destination: 'dungeon_treasure_room' }
+          ],
+          tags: ['puzzle:solved', 'item:shadow_bane_dagger', 'item:underground_map']
+        },
+        riddle_wrong: {
+          id: 'riddle_wrong',
+          text: `The stone face goes silent. For a moment nothing happens — then the floor beneath you gives way. You tumble into a lower chamber, landing hard but unbroken. The riddle guardian has spared your life, at least.`,
+          choices: [
+            { text: 'Find your way to the dungeon depths', destination: 'dungeon_treasure_room' }
+          ],
+          tags: ['puzzle:failed']
+        },
+        dungeon_treasure_room: {
+          id: 'dungeon_treasure_room',
+          text: `The final chamber is dominated by a stone sarcophagus carved with protective runes. Beside it sits a chest, unlocked. Inside: gold, a scroll of ancient sealing magic, and armor bearing the emblem of the Old Circle.
+
+You receive: 300 Gold, Sealing Scroll, Circle Armor`,
+          choices: [
+            { text: 'Take the treasure and head to the World Tree', destination: 'world_tree_grove' },
+            { text: 'Read the sealing scroll before leaving', destination: 'sealing_scroll_lore' }
+          ],
+          tags: ['item:gold_300', 'item:sealing_scroll', 'item:circle_armor']
+        },
+        sealing_scroll_lore: {
+          id: 'sealing_scroll_lore',
+          text: `The scroll is written in the druid tongue, but something about being in this place makes the meaning clear. It describes a ritual to permanently seal a rift in the world's skin — one that requires: the Druid Runestone, a Vial of Clarifying Light, and the will of one who has faced the darkness without surrendering to it.
+
+You may already hold the key.`,
+          choices: [
+            { text: 'Head to the World Tree with newfound purpose', destination: 'world_tree_grove' }
+          ],
+          tags: ['lore:sealing_ritual', 'quest:ritual_components']
+        },
+
+        // --- New content: True ending branch ---
+        true_ending: {
+          id: 'true_ending',
+          text: `With the Druid Runestone, the Vial of Clarifying Light, and the knowledge from the sealing scroll, you perform the ancient ritual at the base of the World Tree. The components resonate, filling the chamber with golden radiance.
+
+Malachar howls — not in rage, but in something like relief. The darkness that has imprisoned him for centuries finally dissolves. He is not destroyed; he is freed.
+
+The World Tree begins to heal. Bark splits to reveal fresh green wood beneath.
+
+THE END — True Ending: The World Restored`,
+          choices: [
+            { text: 'Begin a new adventure', destination: 'start' }
+          ],
+          tags: ['ending:true', 'quest:all_complete']
         }
       }
     };

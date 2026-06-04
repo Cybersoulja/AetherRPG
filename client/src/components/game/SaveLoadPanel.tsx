@@ -64,11 +64,15 @@ export const SaveLoadPanel: React.FC = () => {
       const gameState: GameState = {
         character,
         inventory: items,
-        storyState: null, // Would need to get from story engine
+        storyState: null,
         currentLocation: 'unknown',
         gameFlags: {},
         combatState: null,
-        lastSaved: new Date()
+        lastSaved: new Date(),
+        quests: [],
+        achievements: [],
+        saveSlot: 1,
+        version: '1.0.0'
       };
 
       const saveData = {
