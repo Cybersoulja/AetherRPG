@@ -12,8 +12,19 @@ import "./types";
 const MemoryStore = createMemoryStore(session);
 
 const app = express();
+
+// Trust the first proxy so that cookie.secure works correctly behind reverse
+// proxies on platforms like Render, Heroku, and Railway.
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+if (process.env.NODE_ENV === "production" && !process.env.SESSION_SECRET) {
+  throw new Error(
+    "SESSION_SECRET must be set in production. Generate a strong random value and add it to your environment variables."
+  );
+}
 
 app.use(
   session({

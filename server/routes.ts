@@ -79,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const characterData = req.body;
       const character = await storage.db.insert(schema.characters).values({
-        userId: req.session.userId,
+        userId: req.session.userId!,
         characterData: characterData,
       }).returning();
 
@@ -99,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const characters = await storage.db
         .select()
         .from(schema.characters)
-        .where(eq(schema.characters.userId, req.session.userId));
+        .where(eq(schema.characters.userId, req.session.userId!));
 
       res.json(characters);
     } catch (error) {
@@ -142,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { gameState, slot } = req.body;
 
       const save = await storage.db.insert(schema.gameSaves).values({
-        userId: req.session.userId,
+        userId: req.session.userId!,
         slot: slot || 1,
         gameState: gameState,
       }).returning();
@@ -187,7 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const saves = await storage.db
         .select()
         .from(schema.gameSaves)
-        .where(eq(schema.gameSaves.userId, req.session.userId));
+        .where(eq(schema.gameSaves.userId, req.session.userId!));
 
       res.json(saves);
     } catch (error) {
@@ -233,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const character = req.body;
 
       const entry = await storage.db.insert(schema.leaderboardEntries).values({
-        userId: req.session.userId,
+        userId: req.session.userId!,
         characterName: character.name,
         characterClass: character.class,
         level: character.level,
