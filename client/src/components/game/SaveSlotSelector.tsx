@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useCharacter } from '../../lib/stores/useCharacter';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -10,41 +10,31 @@ import {
   Trash2,
   Clock,
   User,
-  TrendingUp,
   CheckCircle2,
   XCircle,
   FileQuestion,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { GameEngine } from '../../lib/gameEngine';
 
-interface SaveSlotData {
-  slot: number;
-  character: any;
-  lastSaved: string;
-  version: string;
-}
+type SaveEntry = { slot: number; data: any } | null;
 
 export const SaveSlotSelector: React.FC = () => {
   const { character, gameEngine } = useCharacter();
-  const [saves, setSaves] = useState<(SaveSlotData | null)[]>([]);
+  const [saves, setSaves] = useState<SaveEntry[]>([]);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const loadAllSaves = useCallback(() => {
+    setSaves(gameEngine.getAllSaves());
+  }, [gameEngine]);
 
   useEffect(() => {
     loadAllSaves();
-  }, []);
-
-  const loadAllSaves = () => {
-    const engine = new GameEngine();
-    const allSaves = engine.getAllSaves();
-    setSaves(allSaves);
-  };
+  }, [loadAllSaves]);
 
   const handleSaveToSlot = (slot: number) => {
     if (!character) return;
 
     try {
-      const engine = new GameEngine();
       const gameState: any = {
         character,
         inventory: [],
@@ -59,7 +49,7 @@ export const SaveSlotSelector: React.FC = () => {
         version: '2.0.0',
       };
 
-      engine.saveGame(gameState, slot);
+      gameEngine.saveGame(gameState, slot);
       loadAllSaves();
 
       setSaveMessage({
@@ -79,8 +69,7 @@ export const SaveSlotSelector: React.FC = () => {
 
   const handleLoadFromSlot = (slot: number) => {
     try {
-      const engine = new GameEngine();
-      const gameState = engine.loadGame(slot);
+      const gameState = gameEngine.loadGame(slot);
 
       if (!gameState || !gameState.character) {
         setSaveMessage({
@@ -111,8 +100,7 @@ export const SaveSlotSelector: React.FC = () => {
     if (!confirm(`Are you sure you want to delete save slot ${slot}?`)) return;
 
     try {
-      const engine = new GameEngine();
-      engine.deleteSave(slot);
+      gameEngine.deleteSave(slot);
       loadAllSaves();
 
       setSaveMessage({
@@ -131,8 +119,9 @@ export const SaveSlotSelector: React.FC = () => {
   };
 
   const renderSaveSlot = (slot: number) => {
-    const saveData = saves[slot - 1];
-    const isCurrentSlot = saveData && character && saveData.character?.id === character.id;
+    const saveEntry = saves[slot - 1];
+    const saveChar = saveEntry?.data?.character;
+    const isCurrentSlot = saveChar && character && saveChar.id === character.id;
 
     return (
       <Card
@@ -140,7 +129,7 @@ export const SaveSlotSelector: React.FC = () => {
         className={`${
           isCurrentSlot
             ? 'bg-gradient-to-br from-blue-900 to-gray-800 border-blue-500'
-            : saveData
+            : saveEntry
             ? 'bg-gray-800 border-gray-700'
             : 'bg-gray-800/50 border-gray-700'
         }`}
@@ -157,17 +146,17 @@ export const SaveSlotSelector: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {saveData && saveData.character ? (
+          {saveChar ? (
             <div className="space-y-3">
               {/* Character Info */}
               <div className="flex items-center gap-3">
                 <User className="h-8 w-8 text-blue-400" />
                 <div>
                   <div className="font-semibold text-white">
-                    {saveData.character.name}
+                    {saveChar.name}
                   </div>
                   <div className="text-xs text-gray-400 capitalize">
-                    Level {saveData.character.level} {saveData.character.class}
+                    Level {saveChar.level} {saveChar.class}
                   </div>
                 </div>
               </div>
@@ -177,13 +166,13 @@ export const SaveSlotSelector: React.FC = () => {
                 <div>
                   <div className="text-gray-400">Health</div>
                   <div className="text-red-400 font-semibold">
-                    {saveData.character.health}/{saveData.character.maxHealth}
+                    {saveChar.health}/{saveChar.maxHealth}
                   </div>
                 </div>
                 <div>
                   <div className="text-gray-400">Gold</div>
                   <div className="text-yellow-400 font-semibold">
-                    {saveData.character.gold}
+                    {saveChar.gold}
                   </div>
                 </div>
               </div>
@@ -192,7 +181,7 @@ export const SaveSlotSelector: React.FC = () => {
               <div className="flex items-center gap-1 text-xs text-gray-500">
                 <Clock className="h-3 w-3" />
                 Saved{' '}
-                {formatDistanceToNow(new Date(saveData.lastSaved), {
+                {formatDistanceToNow(new Date(saveEntry!.data.lastSaved), {
                   addSuffix: true,
                 })}
               </div>

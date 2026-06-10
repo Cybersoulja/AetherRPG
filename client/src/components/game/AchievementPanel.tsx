@@ -30,7 +30,7 @@ export const AchievementPanel: React.FC = () => {
     if (achievements.length === 0) {
       initializeAchievements();
     }
-  }, [achievements.length, initializeAchievements]);
+  }, [initializeAchievements]);
 
   const renderAchievement = (achievement: Achievement) => {
     const progress = (achievement.progress / achievement.required) * 100;

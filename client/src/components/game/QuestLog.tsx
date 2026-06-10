@@ -36,7 +36,7 @@ export const QuestLog: React.FC = () => {
     if (quests.length === 0) {
       initializeQuests();
     }
-  }, [quests.length, initializeQuests]);
+  }, [initializeQuests]);
 
   const handleActivateQuest = (questId: string) => {
     activateQuest(questId);

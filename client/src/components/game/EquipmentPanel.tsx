@@ -19,7 +19,8 @@ import { Item } from '../../types/game';
 export const EquipmentPanel: React.FC = () => {
   const { character, equipItem, unequipItem, getEquippedItem, getTotalStats, getTotalArmor } = useCharacter();
   const { items, getItemsByType } = useInventory();
-  const [selectedSlot, setSelectedSlot] = useState<keyof typeof character.equippedItems | null>(null);
+  type EquipmentSlot = 'weapon' | 'armor' | 'accessory1' | 'accessory2';
+  const [selectedSlot, setSelectedSlot] = useState<EquipmentSlot | null>(null);
 
   if (!character) {
     return (
