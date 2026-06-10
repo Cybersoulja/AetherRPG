@@ -5,167 +5,102 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ```bash
-# Development
-npm run dev          # Start dev server (client + server with hot reload)
-npm run check        # Run TypeScript type checking
-
-# Database
-npm run db:push      # Push schema changes to Neon PostgreSQL database
-
-# Production
-npm run build        # Build client (Vite) + server (esbuild)
+npm run dev          # Start dev server (client + server with hot reload) on port 5000
+npm run check        # TypeScript type checking (run before committing)
+npm run build        # Build client (Vite) + server (esbuild) for production
 npm run start        # Start production server (requires build first)
+npm run db:push      # Push Drizzle schema changes to Neon PostgreSQL
+
+npm test             # Run all tests once (vitest run)
+npm run test:watch   # Run tests in watch mode
+npx vitest run client/src/components/game/MerchantShop.test.tsx  # Run a single test file
 ```
+
+Path aliases: `@` → `client/src/`, `@shared` → `shared/`.
 
 ## Architecture Overview
 
-**Monorepo Structure**: Single repository with client (React SPA) and server (Express API) sharing TypeScript types.
+**Monorepo**: `client/` (React SPA), `server/` (Express API), `shared/` (types + DB schema). All three share a single `tsconfig.json` in strict mode.
 
-- `client/` - React 18 + TypeScript + Vite frontend
-- `server/` - Express + TypeScript API server
-- `shared/` - Shared types and database schema (Drizzle ORM)
+### Client State — Zustand Stores
 
-### Client Architecture
+All game state lives in `client/src/lib/stores/`. Every store uses `subscribeWithSelector` middleware. `useCharacter` and `useInventory` both hold a `GameEngine` instance (from `client/src/lib/gameEngine.ts`) which owns character creation formulas, combat math, and localStorage save/load logic.
 
-**State Management**: Zustand stores with `subscribeWithSelector` middleware. Each store manages a distinct domain:
+| Store | Responsibility |
+|---|---|
+| `useCharacter` | Character stats, leveling, equipment, spells, talents, gold |
+| `useInventory` | Items, crafting, selling, consuming |
+| `useStoryEngine` | Story progression, choices, history |
+| `useAIAgents` | Template-based DM/NPC responses |
+| `useOracle` | Five-dice poker oracle for resolving player situations |
+| `useAudio` | Background music and SFX |
+| `useQuests` | Quest tracking and objectives |
+| `useAchievements` | Achievement unlocks and progress |
+| `useGame` | Cross-cutting game lifecycle (start, reset, save) |
 
-- `useCharacter` - Character stats, level, class, equipment
-- `useInventory` - Items, equipment slots, consumables
-- `useStoryEngine` - Story nodes, choices, narrative flow
-- `useAIAgents` - Template-based AI responses (DM, NPCs)
-- `useOracle` - Dice oracle for situation outcomes
-- `useAudio` - Background music and sound effects
-- `useQuests` - Quest tracking and objectives
-- `useAchievements` - Achievement unlocks and progress
+### Story System
 
-Stores live in `client/src/lib/stores/` and are consumed by components via hooks.
+`useStoryEngine` currently uses `CustomStoryEngine` (`client/src/lib/customStoryEngine.ts`): a hand-coded story graph where each `StoryNode` has `id`, `text`, `choices[]`, and optional `tags[]`. Tags trigger side effects (item grants, quest updates). Story state persists to `localStorage` under key `rpg_story_save`.
 
-**Story System**: Dual-mode story engine:
-1. **CustomStoryEngine** (`client/src/lib/customStoryEngine.ts`) - Hardcoded story graph with nodes and choices
-2. **Ink.js integration** - Can load `.ink.json` files for more complex branching narratives
+`InkStoryEngine` (`client/src/lib/inkStory.ts`) is a drop-in alternative backed by `client/src/data/story.ink.json`. To switch engines, replace the import in `useStoryEngine.tsx`.
 
-Story state (current node, variables, choices) persists to localStorage via `saveProgress()` / `loadProgress()`.
+### AI Agents and Oracle
 
-**AI Agents**: Template-based responses (no external API). Agents are defined in `client/src/lib/aiAgents.ts` with personality traits and response templates keyed by context (e.g., `combat_start`, `victory`, `greeting`). The `AIAgentEngine` picks random responses and personalizes them based on player name and agent role.
+**AI Agents** (`client/src/lib/aiAgents.ts`): no external API. Each agent has `responseTemplates` keyed by context string (e.g., `combat_start`, `victory`). Call `getResponse(agentId, context, playerName)`.
 
-**Oracle Engine**: Five-die poker oracle (`client/src/lib/oracleEngine.ts`) maps dice rolls to tiers (0-5) and generates narrative outcomes from hand-crafted templates. Used for resolving player-described situations.
+**Oracle** (`client/src/lib/oracleEngine.ts`): rolls 5 dice, scores the hand (pairs → five-of-a-kind), maps to a tier 0–5, and returns a narrative string from hand-crafted templates.
 
-### Server Architecture
+### Server
 
-**API Routes**: Defined in `server/routes.ts`. RESTful endpoints for:
-- `/api/auth/*` - Register, login, logout (bcrypt password hashing, session-based)
-- `/api/characters/*` - CRUD operations for characters (tied to user ID)
-- `/api/saves/*` - Game state save/load by slot
-- `/api/leaderboard/*` - Get/submit leaderboard entries
-- `/api/analytics/event` - Track user events (optional)
+`server/routes.ts` registers all REST endpoints:
+- `POST /api/auth/register|login|logout` — bcrypt hashing, `req.session.userId` for auth
+- `POST /api/characters/save`, `GET /api/characters/load` — character stored as JSONB
+- `POST /api/saves`, `GET /api/saves/:slot` — per-slot game state snapshots
+- `GET|POST /api/leaderboard` — leaderboard entries
+- `POST /api/analytics/event` — optional event tracking
 
-**Database**: PostgreSQL (Neon serverless) via Drizzle ORM. Schema in `shared/schema.ts` defines:
-- `users` - Authentication (username, hashed password)
-- `characters` - Character data as JSONB
-- `gameSaves` - Game state snapshots by slot
-- `leaderboardEntries` - Player rankings
-- `analyticsEvents` - Event tracking
+`server/storage.ts` exports `DatabaseStorage` (implements `IStorage`), which wraps Drizzle queries. Sessions are in-memory via memorystore; swap to `connect-pg-simple` for production persistence.
 
-**Sessions**: Express sessions stored in-memory (memorystore). Production should use `connect-pg-simple` for persistent session storage.
+### Database Schema (`shared/schema.ts`)
 
-### Data Layer
+Tables: `users`, `characters` (JSONB `character_data`), `game_saves` (JSONB `game_state` + `slot` integer), `leaderboard_entries`, `analytics_events`. All foreign-key to `users.id`. Zod insert schemas are auto-derived via `drizzle-zod`.
 
-Static game data (items, spells, quests, etc.) lives in `client/src/data/*.ts` as TypeScript objects. Examples:
-- `items.ts` - Weapons, armor, consumables with stats
-- `spells.ts` - Magic spells with effects and mana costs
-- `quests.ts` - Quest definitions with objectives
-- `talents.ts` - Skill tree nodes
-- `achievements.ts` - Achievement definitions
+### Static Game Data
 
-These are imported directly into components/stores as needed.
+`client/src/data/` holds TypeScript objects imported directly — no fetch needed:
+- `items.ts` — weapons, armor, consumables
+- `spells.ts` — spells with mana costs and effects
+- `quests.ts` — quest definitions and objectives
+- `talents.ts` — skill tree nodes per class
+- `achievements.ts` — achievement definitions
+- `characters.ts` — `CHARACTER_CLASSES` with base stats per class
+- `merchants.ts` — merchant definitions with `ShopItem[]` inventory
+- `recipes.ts` — crafting recipes
 
-### UI Components
+### Merchant / Shop Pricing
 
-Built on **Radix UI** primitives + **Tailwind CSS**. Component library in `client/src/components/ui/` provides:
-- `button`, `card`, `dialog`, `tabs`, `textarea`, etc.
+`ShopItem` wraps `Item` with `stock` and `priceModifier`. Final buy price: `Math.ceil(item.value * priceModifier * merchant.buyPriceModifier)`. Stock is tracked in local component state per session — it is not persisted to the server.
 
-Game-specific components in `client/src/components/game/`:
-- `GameInterface.tsx` - Main game container with tabbed layout
-- `CharacterCreation.tsx` - Class selection and stat allocation
-- `StoryDisplay.tsx` - Renders current story text
-- `ChoiceButtons.tsx` - Interactive choice selection
-- `InventoryPanel.tsx` - Item management
-- `OraclePanel.tsx` - Dice oracle consultation UI
-- `CharacterSheet.tsx` - Full character stats display
+## Testing
 
-## Key Patterns and Conventions
+Tests live alongside components in `client/src/`. `vitest.config.ts` is separate from `vite.config.ts` to avoid build interference. Uses **vitest v2** (not v4) — v4's rolldown bundler is incompatible with `@vitejs/plugin-react` JSX transforms.
 
-### Adding New Zustand Stores
+Mock Zustand stores per-test file with `vi.mock('../../lib/stores/useCharacter', ...)`. Do not rely on real store state in component tests.
 
-1. Create `client/src/lib/stores/useYourFeature.tsx`
-2. Use `subscribeWithSelector` middleware for reactive subscriptions
-3. Define state interface with actions (e.g., `initialize`, `update`, `reset`)
-4. Export typed hook: `export const useYourFeature = create<YourState>()(subscribeWithSelector(...))`
+## Key Patterns
 
-### Adding Story Nodes (CustomStoryEngine)
+**New Zustand store**: create `client/src/lib/stores/useYourFeature.tsx`, use `subscribeWithSelector`, define a state interface with typed actions, export `create<YourState>()(subscribeWithSelector(...))`.
 
-Story nodes are defined in `createStoryData()` inside `customStoryEngine.ts`. Each node has:
-```typescript
-{
-  id: 'unique_id',
-  text: 'Story text with markdown support',
-  choices: [
-    { text: 'Choice text', destination: 'target_node_id' }
-  ],
-  tags: ['location:town', 'character:npc_name', 'item:sword']
-}
-```
+**New story node**: add to `createStoryData()` in `customStoryEngine.ts` with `id`, `text`, `choices[]`, and optional `tags[]` (format: `'location:town'`, `'item:sword'`).
 
-Tags are used to trigger effects (item acquisition, quest updates, etc.).
+**Schema change**: edit `shared/schema.ts`, run `npm run db:push`, types are auto-inferred via `typeof table.$inferSelect`.
 
-### Adding AI Agent Responses
+## Environment Variables
 
-Edit `client/src/lib/aiAgents.ts`:
-1. Add new agent to `agents` array with `id`, `role`, `personality`, `knowledge`
-2. Define `responseTemplates` object keyed by context
-3. Use `getResponse(agentId, context, {playerName})` to generate responses
+Copy `.env.example` → `.env`:
+- `DATABASE_URL` — Neon PostgreSQL connection string (required for any DB operation)
+- `SESSION_SECRET` — express-session secret
+- `VITE_ENABLE_CLOUD_SAVES`, `VITE_ENABLE_LEADERBOARDS`, `VITE_ENABLE_MULTIPLAYER` — feature flags (`"true"`/`"false"`)
+- `VITE_MAX_SAVES` (default `5`), `VITE_MAX_INVENTORY` (default `100`)
 
-### Database Schema Changes
-
-1. Edit `shared/schema.ts` (Drizzle schema)
-2. Run `npm run db:push` to sync with Neon database
-3. Update TypeScript types (auto-inferred via `typeof table.$inferSelect`)
-
-### Environment Variables
-
-Copy `.env.example` to `.env` and configure:
-- `DATABASE_URL` - PostgreSQL connection string (required for db operations)
-- `SESSION_SECRET` - Secret for session encryption
-- `VITE_*` - Client-side feature flags (multiplayer, cloud saves, leaderboards)
-
-All `VITE_*` vars are injected into client bundle and accessible via `import.meta.env`.
-
-## Important Architectural Details
-
-**Game State Persistence**: Two-tier system:
-1. **Client-side** - localStorage for quick save/load (no network required)
-2. **Server-side** - PostgreSQL for cloud saves (requires authentication)
-
-Both use the same `GameState` type defined in `client/src/types/game.ts`.
-
-**Character Progression**: XP thresholds defined in character store. Leveling up triggers stat point allocation and potential talent unlocks. Stats affect combat calculations (damage, armor, hit chance).
-
-**Combat System**: Turn-based with enemy AI. Damage formula incorporates character stats, weapon stats, and random variance. Status effects (poison, buffs, etc.) apply per-turn modifiers.
-
-**Item Rarity System**: `common | uncommon | rare | epic | legendary` affects stat bonuses and visual presentation (color coding in UI).
-
-**Quest System**: Each quest has objectives with completion tracking. Objectives can be `kill`, `collect`, `reach_location`, `talk_to_npc`, or `use_item`. Quest rewards grant XP, gold, and items.
-
-**Ink.js Integration**: If using Ink instead of CustomStoryEngine, place `.ink.json` files in `client/src/data/` and load via `inkStory.ts` utilities. Ink provides richer conditional logic and variable tracking than the custom engine.
-
-## Testing and Debugging
-
-**Type Checking**: Run `npm run check` before committing. The codebase uses strict TypeScript.
-
-**Hot Reload**: Vite dev server watches `client/src/**` for changes. Server restarts on `server/**` changes via `tsx` watch mode.
-
-**Database Debugging**: Drizzle logs SQL queries in development mode. Check server console for query output.
-
-**Story Testing**: Use browser DevTools → Application → Local Storage to inspect saved story state. Key: `rpg_story_save`.
-
-**Session Debugging**: Sessions stored in-memory by default. To inspect: add breakpoints in `server/routes.ts` and check `req.session.userId`.
+All `VITE_*` vars are inlined into the client bundle at build time and accessed via `import.meta.env`.
