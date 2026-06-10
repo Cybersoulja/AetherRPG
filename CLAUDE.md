@@ -95,6 +95,20 @@ Mock Zustand stores per-test file with `vi.mock('../../lib/stores/useCharacter',
 
 **Schema change**: edit `shared/schema.ts`, run `npm run db:push`, types are auto-inferred via `typeof table.$inferSelect`.
 
+## Known Pitfalls
+
+**`GameEngine.getAllSaves()` wraps each entry.** The return type is `Array<{ slot: number; data: GameState } | null>` — game state is nested under `.data`. Access character as `entry.data.character`, not `entry.character`.
+
+**Always use the store's `gameEngine` instance.** `useCharacter` exposes `gameEngine` — use it instead of `new GameEngine()`. All GameEngine instances share localStorage but creating new ones is wasteful and makes testing harder.
+
+**useEffect deps: use stable references, not derived values.** Deps like `achievements.length` cause re-runs on every list mutation. Prefer `[initializeAchievements]` with an `if (list.length === 0)` guard inside the effect.
+
+**Declare slot types explicitly before null guards.** TypeScript resolves `keyof typeof character.equippedItems` at the point of declaration; if `character` is `Character | null`, this fails before the null check. Use an explicit union type alias instead.
+
+**`GameInterface` tabs use a 12-column grid** (`grid-cols-12` on `lg:`). Adding or removing tabs requires updating the grid spec.
+
+**`analyze-th` branch was rebased onto `main`.** If rebasing again, expect a resolved conflict in `GameInterface.tsx` — the `analyze-th` PR added 8 new tabs while main had 5 (the 5-tab version is gone; use the 12-tab version as the baseline).
+
 ## Environment Variables
 
 Copy `.env.example` → `.env`:
