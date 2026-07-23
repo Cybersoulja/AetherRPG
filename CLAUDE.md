@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Development
-npm run dev          # Start dev server (client + server with hot reload)
+npm run dev          # Start dev server (client + server with hot reload, http://localhost:5000)
 npm run check        # Run TypeScript type checking
 
 # Database
@@ -16,6 +16,10 @@ npm run db:push      # Push schema changes to Neon PostgreSQL database
 npm run build        # Build client (Vite) + server (esbuild)
 npm run start        # Start production server (requires build first)
 ```
+
+There is no lint script and no test suite/framework configured in this repo. CI (`.github/workflows/ci.yml`) only runs `npm run check` on push/PR — treat that as the minimum bar before committing.
+
+The dev server always runs on port 5000 (hardcoded in `server/index.ts`) and serves both the API and the Vite-built client from one process.
 
 ## Architecture Overview
 
@@ -29,6 +33,7 @@ npm run start        # Start production server (requires build first)
 
 **State Management**: Zustand stores with `subscribeWithSelector` middleware. Each store manages a distinct domain:
 
+- `useGame` - Top-level game phase machine (`ready` → `playing` → `ended`)
 - `useCharacter` - Character stats, level, class, equipment
 - `useInventory` - Items, equipment slots, consumables
 - `useStoryEngine` - Story nodes, choices, narrative flow
@@ -46,7 +51,7 @@ Stores live in `client/src/lib/stores/` and are consumed by components via hooks
 
 Story state (current node, variables, choices) persists to localStorage via `saveProgress()` / `loadProgress()`.
 
-**AI Agents**: Template-based responses (no external API). Agents are defined in `client/src/lib/aiAgents.ts` with personality traits and response templates keyed by context (e.g., `combat_start`, `victory`, `greeting`). The `AIAgentEngine` picks random responses and personalizes them based on player name and agent role.
+**AI Agents**: Template-based responses (no external API/LLM call). Agents are defined in `client/src/lib/aiAgents.ts` with personality traits and response templates keyed by context (e.g., `combat_start`, `victory`, `greeting`). The `AIAgentEngine` picks random responses and personalizes them based on player name and agent role. Agent/UI copy refers to this as "Taskade AI" (e.g. the DM agent is named `'Taskade DM'`, see `WelcomeScreen.tsx`/`StoryDisplay.tsx`) — that's flavor text only, there is no actual Taskade integration.
 
 **Oracle Engine**: Five-die poker oracle (`client/src/lib/oracleEngine.ts`) maps dice rolls to tiers (0-5) and generates narrative outcomes from hand-crafted templates. Used for resolving player-described situations.
 
@@ -66,7 +71,9 @@ Story state (current node, variables, choices) persists to localStorage via `sav
 - `leaderboardEntries` - Player rankings
 - `analyticsEvents` - Event tracking
 
-**Sessions**: Express sessions stored in-memory (memorystore). Production should use `connect-pg-simple` for persistent session storage.
+**Sessions**: Express sessions stored in-memory (`memorystore`), configured in `server/index.ts`. Production should use `connect-pg-simple` for persistent session storage.
+
+**Storage layer**: `server/storage.ts` exports a `DatabaseStorage` singleton (`storage`) implementing `IStorage`, but `IStorage` only covers `users` (get/getByUsername/insert). Routes for characters, saves, leaderboard, and analytics in `server/routes.ts` bypass that interface and query Drizzle directly via `storage.db.insert/select(...)` using the table schemas from `shared/schema.ts`. When adding a new persisted entity, either follow this direct-`storage.db` pattern or extend `IStorage` to keep it consistent with existing routes.
 
 ### Data Layer
 
