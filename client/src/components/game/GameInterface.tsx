@@ -9,17 +9,35 @@ import { ChoiceButtons } from './ChoiceButtons';
 import { InventoryPanel } from './InventoryPanel';
 import { SaveLoadPanel } from './SaveLoadPanel';
 import { OraclePanel } from './OraclePanel';
+import { EquipmentPanel } from './EquipmentPanel';
+import { QuestLog } from './QuestLog';
+import { AchievementPanel } from './AchievementPanel';
+import { CraftingBench } from './CraftingBench';
+import { MerchantShop } from './MerchantShop';
+import { TalentTree } from './TalentTree';
+import { StatAllocation } from './StatAllocation';
+import { SaveSlotSelector } from './SaveSlotSelector';
 import { Card, CardContent } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Button } from '../ui/button';
-import { Gamepad2, User, Package, Save, Volume2, VolumeX, Dices } from 'lucide-react';
+import {
+  Gamepad2,
+  User,
+  Package,
+  Save,
+  Volume2,
+  VolumeX,
+  Sword,
+  ScrollText,
+  Trophy,
+  Hammer,
+  Store,
+  Sparkles,
+  TrendingUp,
+  Dices,
+} from 'lucide-react';
 import { useAudio } from '../../lib/stores/useAudio';
 
-/**
- * The main game interface component.
- * It displays the story, choices, character sheet, inventory, and save/load panels.
- * @returns {JSX.Element} The rendered game interface.
- */
 export const GameInterface: React.FC = () => {
   const { character } = useCharacter();
   const { currentText, currentChoices, initializeStory, makeChoice, isLoading } = useStoryEngine();
@@ -35,8 +53,7 @@ export const GameInterface: React.FC = () => {
   const handleChoice = async (choiceIndex: number) => {
     if (currentChoices[choiceIndex]) {
       makeChoice(choiceIndex);
-      
-      // Get AI DM response based on choice
+
       const context = currentChoices[choiceIndex].text.toLowerCase().includes('combat') ? 'combat_start' : 'continue';
       const response = await getResponse('dungeon_master', context, character?.name);
       setDmResponse(response);
@@ -82,33 +99,56 @@ export const GameInterface: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto p-2 sm:p-4 max-w-6xl">
+      <div className="container mx-auto p-2 sm:p-4 max-w-7xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-gray-800 border-gray-700 h-auto">
-            <TabsTrigger value="story" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+          <TabsList className="grid w-full grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 bg-gray-800 border-gray-700 h-auto gap-1">
+            <TabsTrigger value="story" className="flex items-center gap-1 p-2 text-xs">
               <Gamepad2 className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Adventure</span>
-              <span className="xs:hidden">Game</span>
+              <span className="hidden sm:inline">Story</span>
             </TabsTrigger>
-            <TabsTrigger value="character" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+            <TabsTrigger value="character" className="flex items-center gap-1 p-2 text-xs">
               <User className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Character</span>
-              <span className="xs:hidden">Char</span>
+              <span className="hidden sm:inline">Character</span>
             </TabsTrigger>
-            <TabsTrigger value="inventory" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+            <TabsTrigger value="equipment" className="flex items-center gap-1 p-2 text-xs">
+              <Sword className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Equipment</span>
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="flex items-center gap-1 p-2 text-xs">
               <Package className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Inventory</span>
-              <span className="xs:hidden">Inv</span>
+              <span className="hidden sm:inline">Inventory</span>
             </TabsTrigger>
-            <TabsTrigger value="oracle" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+            <TabsTrigger value="quests" className="flex items-center gap-1 p-2 text-xs">
+              <ScrollText className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Quests</span>
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="flex items-center gap-1 p-2 text-xs">
+              <Trophy className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Achievements</span>
+            </TabsTrigger>
+            <TabsTrigger value="crafting" className="flex items-center gap-1 p-2 text-xs">
+              <Hammer className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Crafting</span>
+            </TabsTrigger>
+            <TabsTrigger value="shop" className="flex items-center gap-1 p-2 text-xs">
+              <Store className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Shop</span>
+            </TabsTrigger>
+            <TabsTrigger value="talents" className="flex items-center gap-1 p-2 text-xs">
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Talents</span>
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="flex items-center gap-1 p-2 text-xs">
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Stats</span>
+            </TabsTrigger>
+            <TabsTrigger value="oracle" className="flex items-center gap-1 p-2 text-xs">
               <Dices className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Oracle</span>
-              <span className="xs:hidden">Dice</span>
+              <span className="hidden sm:inline">Oracle</span>
             </TabsTrigger>
-            <TabsTrigger value="save" className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 text-xs sm:text-sm">
+            <TabsTrigger value="save" className="flex items-center gap-1 p-2 text-xs">
               <Save className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Save/Load</span>
-              <span className="xs:hidden">Save</span>
+              <span className="hidden sm:inline">Save</span>
             </TabsTrigger>
           </TabsList>
 
@@ -166,17 +206,17 @@ export const GameInterface: React.FC = () => {
                   <CardContent className="p-4">
                     <h4 className="font-bold mb-3 text-green-400">Quick Actions</h4>
                     <div className="space-y-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="w-full bg-gray-700 border-gray-600 hover:bg-gray-600"
                         onClick={() => setActiveTab('inventory')}
                       >
                         View Inventory
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="w-full bg-gray-700 border-gray-600 hover:bg-gray-600"
                         onClick={() => setActiveTab('character')}
                       >
@@ -197,12 +237,40 @@ export const GameInterface: React.FC = () => {
             <InventoryPanel />
           </TabsContent>
 
+          <TabsContent value="equipment" className="mt-4">
+            <EquipmentPanel />
+          </TabsContent>
+
+          <TabsContent value="quests" className="mt-4">
+            <QuestLog />
+          </TabsContent>
+
+          <TabsContent value="achievements" className="mt-4">
+            <AchievementPanel />
+          </TabsContent>
+
+          <TabsContent value="crafting" className="mt-4">
+            <CraftingBench />
+          </TabsContent>
+
+          <TabsContent value="shop" className="mt-4">
+            <MerchantShop />
+          </TabsContent>
+
+          <TabsContent value="talents" className="mt-4">
+            <TalentTree />
+          </TabsContent>
+
+          <TabsContent value="stats" className="mt-4">
+            <StatAllocation />
+          </TabsContent>
+
           <TabsContent value="oracle" className="mt-4">
             <OraclePanel />
           </TabsContent>
 
           <TabsContent value="save" className="mt-4">
-            <SaveLoadPanel />
+            <SaveSlotSelector />
           </TabsContent>
         </Tabs>
       </div>
